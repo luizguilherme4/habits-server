@@ -16,8 +16,8 @@ model Habit {
   title      String
   created_at DateTime
 
-  dayHabits DayHabit[]
   weekDays  HabitWeekDays[]
+  dayHabits DayHabit[]
 
   @@map("habits")
 }
@@ -25,7 +25,7 @@ model Habit {
 model HabitWeekDays {
   id       String @id @default(uuid())
   habit_id String
-  week_day String
+  week_day Int
 
   habit Habit @relation(fields: [habit_id], references: [id])
 
