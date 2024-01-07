@@ -1,10 +1,31 @@
 import { FastifyInstance } from "fastify";
+import { z } from "zod";
 import { prisma } from "./lib/prisma";
+import dayjs from "dayjs";
 
 export async function appRoutes(app: FastifyInstance) {
-  app.get("/habits", async () => {
-    const habits = await prisma.habit.findMany();
+  app.post("/habits", async (request) => {
+    const createHabiBody = z.object({
+      title: z.string(),
+      weekDays: z.array(z.number().min(0).max(6)),
+    });
 
-    return habits;
+    const { title, weekDays } = createHabiBody.parse(request.body);
+
+    const today = dayjs().startOf("day").toDate();
+
+    await prisma.habit.create({
+      data: {
+        title,
+        created_at: today,
+        weekDays: {
+          create: weekDays.map((weekDay) => {
+            return {
+              week_day: weekDay,
+            };
+          }),
+        },
+      },
+    });
   });
 }
